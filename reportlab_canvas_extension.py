@@ -1,0 +1,224 @@
+# Wyatt Geckle
+# 6/23/22
+#
+# Define extra methods or extend functionality of existing ones in the
+# ReportLab Canvas class.
+#
+# All doc-strings are directly copied, slightly modified, or
+# otherwise derived from those in the ReportLab API Reference.
+# https://www.reportlab.com/docs/reportlab-reference.pdf
+#
+# Tested in ReportLab version 3.6.10
+# https://pypi.org/project/reportlab/ 
+
+import math
+
+from reportlab.pdfgen.canvas import Canvas as StockCanvas
+from reportlab.lib.utils import ImageReader
+from reportlab.graphics.charts.textlabels import _text2Path
+
+
+class Canvas(StockCanvas):
+    
+    def __init__(self, filename, **kwargs):
+        super().__init__(filename, **kwargs)
+        
+        self.fontSize = 12  # Default ReportLab font is Helvetica 12
+        
+    def arrow(self, x1, y1, x2, y2, arrowheadlength=None):
+        """Draw an arrow from (x1, y1) to (x2, y2) with arrowhead at
+        (x2, y2).
+        
+        Arrowhead size is about 1/12 of the arrow length by default.
+        
+        Due to issues with the default end, the line cap is always
+        round."""
+        
+        self.saveState()
+        
+        self.setLineCap(1)
+        
+        self.line(x1, y1, x2, y2)
+        
+        if arrowheadlength is None:
+            arrowheadlength = 0.083333 * math.sqrt((x2 - x1)*(x2 - x1)
+                                                   + (y2 - y1)*(y2 - y1))
+        theta = math.atan2(y2 - y1, x2 - x1)
+        
+        self.lineAngle(x2, y2, arrowheadlength, theta + math.radians(150),
+                       radians=True)
+        self.lineAngle(x2, y2, arrowheadlength, theta - math.radians(150),
+                       radians=True)
+                       
+        self.restoreState()
+        
+    def arrowAngle(
+            self, x1, y1, r, theta, radians=False, arrowheadlength=None):
+        """Draw an arrow from (x1, y1) to polar coordinates (r, theta)
+        with arrowhead at (r, theta).
+        
+        theta is in degrees by default.
+        
+        Arrowhead size is about 1/12 of the arrow length by default.
+        
+        Due to issues with the default end, the line cap is always
+        round."""
+        
+        self.saveState()
+        
+        self.setLineCap(1)
+        
+        if not radians:
+            theta = math.radians(theta)
+            
+        self.lineAngle(x1, y1, r, theta, radians=True)
+        
+        x2 = x1 + r * math.cos(theta)
+        y2 = y1 + r * math.sin(theta)
+        if arrowheadlength is None:
+            arrowheadlength = 0.083333 * math.sqrt((x2 - x1)*(x2 - x1)
+                                                   + (y2 - y1)*(y2 - y1))
+        
+        self.lineAngle(x2, y2, arrowheadlength, theta + math.radians(150),
+                       radians=True)
+        self.lineAngle(x2, y2, arrowheadlength, theta - math.radians(150),
+                       radians=True)
+                       
+        self.restoreState()
+                   
+    def drawAnchoredImage(
+            self, image, x, y, width=None, height=None, mask=None, anchor='c'):
+        """Draws the image (ImageReader object or filename) as
+        specified.
+        
+        "image" may be an image filename or an ImageReader object.
+        
+        x and y define the origin of the image you wish to draw.
+        
+        If width and height are not given, the width and height of the
+        image in pixels is used at a scale of 1 point to 1 pixel.
+
+        If either width or height are given, the image will be scaled
+        based on the given dimention.
+
+        If width and height are given, the image will be stretched to
+        fill the given rectangle bounded by (x, y, x+width, y-height).
+
+        If you supply negative widths and/or heights, it inverts them.
+        
+        The method returns the width and height of the underlying image,
+        since this is often useful for layout algorithms and saves you
+        work if you have not specified them yourself.
+        
+        The mask parameter supports transparent backgrounds.  It takes
+        6 numbers and defines the range of RGB values which will be
+        masked out or treated as transparent.  For example with
+        [0,2,40,42,136,139], it will mask out any pixels with a Red
+        value from 0-2, Green from 40-42 and Blue from 136-139
+        (on a scale of 0-255).
+        
+        The origin of the image is placed at an anchor point:
+            nw   n   ne
+            w    c    e
+            sw   s   se"""
+        
+        if isinstance(image, str):
+            image = ImageReader(image)
+            
+        img_width, img_height = image.getSize()
+        
+        if width is None and height is None:
+            width = img_width
+            height = img_height
+        elif width is None and height is not None:
+            width = height * img_width // img_height
+        elif height is None and width is not None:
+            height = width * img_height // img_width
+        
+        if anchor[-1] == 'w':
+            x_offset = 0
+        elif anchor[-1] == 'e':
+            x_offset = width
+        else:
+            x_offset = 0.5 * width
+        
+        if anchor[0] == 's':
+            y_offset = 0
+        elif anchor[0] == 'n':
+            y_offset = height
+        else:
+            y_offset = 0.5 * height
+        
+        return self.drawImage(image, x - x_offset, y - y_offset,
+                              width=width, height=height, mask=mask)
+    
+    def drawAnchoredString(self, x, y, text, anchor='c', **kwargs):
+        """Draws a string in the current text styles with alignment
+        defined by the anchor point.
+        
+        The origin of the text is placed at an anchor point:
+            nw   n   ne
+            w    c    e
+            sw   s   se"""
+        
+        text_dims = _text2Path(text, fontSize=self.fontSize).getBounds()
+        text_height = text_dims[3] - text_dims[1]
+        
+        if anchor[0] == 's':
+            y_offset = 0
+        elif anchor[0] == 'n':
+            y_offset = text_height
+        else:
+            y_offset = 0.5 * text_height
+            
+        if anchor[-1] == 'w':
+            self.drawString(x, y - y_offset, text, **kwargs)
+            return
+            
+        if anchor[-1] == 'e':
+            self.drawRightString(x, y - y_offset, text, **kwargs)
+            return
+            
+        self.drawCentredString(x, y - y_offset, text, **kwargs)
+                   
+    def lineAngle(self, x1, y1, r, theta, radians=False):
+        """Draw a line segment from (x1, y1) to polar coordinates
+        (r, theta).
+        
+        theta is in degrees by default."""
+        
+        if not radians:
+            theta = math.radians(theta)
+            
+        x2 = r * math.cos(theta) + x1
+        y2 = r * math.sin(theta) + y1
+        
+        self.line(x1, y1, x2, y2)
+        
+    def rectEndPoints(self, x1, y1, x2, y2, stroke=1, fill=0):
+        """Draw a rectangle with lower left corner at (x1, y1) and upper
+        right corner at (x2, y2)."""
+        
+        self.rect(x1, y1, x2 - x1, y2 - y1, stroke=stroke, fill=fill)
+        
+    def setFont(self, psfontname, size, **kwargs):
+        """Sets the font. If leading not specified, defaults to 1.2 x
+        font size. Raises a readable exception if an illegal font
+        is supplied. Font names are case-sensitive! Keeps track
+        of font name and size for metrics.
+        
+        Saves font size to canvas object."""
+        
+        super().setFont(psfontname, size, **kwargs)
+        
+        self.fontSize = size
+        
+    def setFontSize(self, size=None, **kwargs):
+        """Sets font size or leading without knowing the font face.
+        
+        Saves font size to canvas object."""
+        
+        super().setFontSize(size=size, **kwargs)
+        
+        if size is not None:
+            self.fontSize = size
