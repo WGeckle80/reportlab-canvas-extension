@@ -1,15 +1,15 @@
 # Wyatt Geckle
-# 6/23/22
+# 6/27/22
 #
 # Define extra methods or extend functionality of existing ones in the
 # ReportLab Canvas class.
 #
-# All doc-strings are directly copied, slightly modified, or
+# All docstrings are directly copied, slightly modified, or
 # otherwise derived from those in the ReportLab API Reference.
 # https://www.reportlab.com/docs/reportlab-reference.pdf
 #
 # Tested in ReportLab version 3.6.10
-# https://pypi.org/project/reportlab/ 
+# https://pypi.org/project/reportlab/
 
 import math
 
@@ -19,8 +19,17 @@ from reportlab.graphics.charts.textlabels import _text2Path
 
 
 class Canvas(StockCanvas):
+    """This is an extended ReportLab Canvas with additional features
+    not provided by the official class.  Additions include:
+        - drawing arrows
+        - drawing lines based on polar coordinates
+        - drawing rectangles based on their endpoints
+        - proper anchoring of images and text."""
     
     def __init__(self, filename, **kwargs):
+        """Initialize a canvas object and save the font size for
+        later use."""
+        
         super().__init__(filename, **kwargs)
         
         self.fontSize = 12  # Default ReportLab font is Helvetica 12
