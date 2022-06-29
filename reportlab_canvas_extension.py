@@ -1,5 +1,5 @@
 # Wyatt Geckle
-# 6/27/22
+# 6/29/22
 #
 # Define extra methods or extend functionality of existing ones in the
 # ReportLab Canvas class.
@@ -71,7 +71,9 @@ class Canvas(StockCanvas):
         Arrowhead size is about 1/12 of the arrow length by default.
         
         Due to issues with the default end, the line cap is always
-        round."""
+        round.
+
+        Returns the x and y coordinates of the arrow endpoint."""
         
         self.saveState()
         
@@ -80,10 +82,8 @@ class Canvas(StockCanvas):
         if not radians:
             theta = math.radians(theta)
             
-        self.lineAngle(x1, y1, r, theta, radians=True)
+        x2, y2 = self.lineAngle(x1, y1, r, theta, radians=True)
         
-        x2 = x1 + r * math.cos(theta)
-        y2 = y1 + r * math.sin(theta)
         if arrowheadlength is None:
             arrowheadlength = 0.083333 * math.sqrt((x2 - x1)*(x2 - x1)
                                                    + (y2 - y1)*(y2 - y1))
@@ -94,6 +94,8 @@ class Canvas(StockCanvas):
                        radians=True)
                        
         self.restoreState()
+
+        return x2, y2
                    
     def drawAnchoredImage(
             self, image, x, y, width=None, height=None, mask=None, anchor='c'):
@@ -194,7 +196,9 @@ class Canvas(StockCanvas):
         """Draw a line segment from (x1, y1) to polar coordinates
         (r, theta).
         
-        theta is in degrees by default."""
+        theta is in degrees by default.
+
+        Returns the x and y coordinates of the line endpoint."""
         
         if not radians:
             theta = math.radians(theta)
@@ -203,6 +207,8 @@ class Canvas(StockCanvas):
         y2 = r * math.sin(theta) + y1
         
         self.line(x1, y1, x2, y2)
+
+        return x2, y2
         
     def rectEndPoints(self, x1, y1, x2, y2, stroke=1, fill=0):
         """Draw a rectangle with lower left corner at (x1, y1) and upper
