@@ -1,15 +1,20 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # Wyatt Geckle
-# 6/29/22
-#
-# Define extra methods or extend functionality of existing ones in the
-# ReportLab Canvas class.
-#
-# All docstrings are directly copied, slightly modified, or
-# otherwise derived from those in the ReportLab API Reference.
-# https://www.reportlab.com/docs/reportlab-reference.pdf
-#
-# Tested in ReportLab version 3.6.10
-# https://pypi.org/project/reportlab/
+# 7/14/22
+
+"""Define extra methods or extend functionality of existing ones in the
+   ReportLab Canvas class.
+  
+   All docstrings are directly copied, slightly modified, or
+   otherwise derived from those in the ReportLab API Reference.
+   https://www.reportlab.com/docs/reportlab-reference.pdf
+  
+   Tested in ReportLab version 3.6.10
+   https://pypi.org/project/reportlab/
+"""
+
 
 import math
 
@@ -26,7 +31,7 @@ class Canvas(StockCanvas):
         - drawing rectangles based on their endpoints
         - proper anchoring of images and text."""
     
-    def __init__(self, filename, **kwargs):
+    def __init__(self, filename: str, **kwargs):
         """Initialize a canvas object and save the font size for
         later use."""
         
@@ -34,7 +39,9 @@ class Canvas(StockCanvas):
         
         self.fontSize = 12  # Default ReportLab font is Helvetica 12
         
-    def arrow(self, x1, y1, x2, y2, arrowheadlength=None):
+    def arrow(
+            self, x1: float, y1: float, x2: float, y2: float,
+            arrowheadlength: float = None):
         """Draw an arrow from (x1, y1) to (x2, y2) with arrowhead at
         (x2, y2).
         
@@ -62,7 +69,9 @@ class Canvas(StockCanvas):
         self.restoreState()
         
     def arrowAngle(
-            self, x1, y1, r, theta, radians=False, arrowheadlength=None):
+            self, x1: float, y1: float, length: float, theta: float,
+            radians: bool = False,
+            arrowheadlength: float = None) -> (float, float):
         """Draw an arrow from (x1, y1) to polar coordinates (r, theta)
         with arrowhead at (r, theta).
         
@@ -82,7 +91,7 @@ class Canvas(StockCanvas):
         if not radians:
             theta = math.radians(theta)
             
-        x2, y2 = self.lineAngle(x1, y1, r, theta, radians=True)
+        x2, y2 = self.lineAngle(x1, y1, length, theta, radians=True)
         
         if arrowheadlength is None:
             arrowheadlength = 0.083333 * math.sqrt((x2 - x1)*(x2 - x1)
@@ -98,7 +107,9 @@ class Canvas(StockCanvas):
         return x2, y2
                    
     def drawAnchoredImage(
-            self, image, x, y, width=None, height=None, mask=None, anchor='c'):
+            self, image: (ImageReader, str), x: float, y: float,
+            width: float = None, height: float = None, mask: list = None,
+            anchor: str = 'c') -> (int, int):
         """Draws the image (ImageReader object or filename) as
         specified.
         
@@ -163,7 +174,8 @@ class Canvas(StockCanvas):
         return self.drawImage(image, x - x_offset, y - y_offset,
                               width=width, height=height, mask=mask)
     
-    def drawAnchoredString(self, x, y, text, anchor='c', **kwargs):
+    def drawAnchoredString(
+            self, x: float, y: float, text: str, anchor: str = 'c', **kwargs):
         """Draws a string in the current text styles with alignment
         defined by the anchor point.
         
@@ -192,7 +204,9 @@ class Canvas(StockCanvas):
             
         self.drawCentredString(x, y - y_offset, text, **kwargs)
                    
-    def lineAngle(self, x1, y1, r, theta, radians=False):
+    def lineAngle(
+            self, x1: float, y1: float, length: float, theta: float,
+            radians: bool = False) -> (float, float):
         """Draw a line segment from (x1, y1) to polar coordinates
         (r, theta).
         
@@ -203,20 +217,22 @@ class Canvas(StockCanvas):
         if not radians:
             theta = math.radians(theta)
             
-        x2 = r * math.cos(theta) + x1
-        y2 = r * math.sin(theta) + y1
+        x2 = length * math.cos(theta) + x1
+        y2 = length * math.sin(theta) + y1
         
         self.line(x1, y1, x2, y2)
 
         return x2, y2
         
-    def rectEndPoints(self, x1, y1, x2, y2, stroke=1, fill=0):
+    def rectCoords(
+            self, x1: float, y1: float, x2: float, y2: float,
+            stroke: bool = True, fill: bool = False):
         """Draw a rectangle with lower left corner at (x1, y1) and upper
         right corner at (x2, y2)."""
         
         self.rect(x1, y1, x2 - x1, y2 - y1, stroke=stroke, fill=fill)
         
-    def setFont(self, psfontname, size, **kwargs):
+    def setFont(self, psfontname: str, size: float, **kwargs):
         """Sets the font. If leading not specified, defaults to 1.2 x
         font size. Raises a readable exception if an illegal font
         is supplied. Font names are case-sensitive! Keeps track
@@ -228,7 +244,7 @@ class Canvas(StockCanvas):
         
         self.fontSize = size
         
-    def setFontSize(self, size=None, **kwargs):
+    def setFontSize(self, size: float = None, **kwargs):
         """Sets font size or leading without knowing the font face.
         
         Saves font size to canvas object."""
@@ -237,3 +253,4 @@ class Canvas(StockCanvas):
         
         if size is not None:
             self.fontSize = size
+
