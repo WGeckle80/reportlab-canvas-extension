@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Wyatt Geckle
-# 7/28/22
+# 3/26/22
 
 """Define extra methods or extend functionality of existing ones in the
    ReportLab Canvas class.
@@ -29,8 +29,9 @@ class Canvas(StockCanvas):
         - drawing arrows
         - drawing lines based on polar coordinates
         - drawing rectangles based on their endpoints
-        - proper anchoring of images and text."""
-    
+        - proper anchoring of images and text"""
+
+
     def __init__(self, filename: str, **kwargs):
         """Initialize a canvas object and save the font size for
         later use."""
@@ -38,7 +39,8 @@ class Canvas(StockCanvas):
         super().__init__(filename, **kwargs)
         
         self.fontSize = 12  # Default ReportLab font is Helvetica 12
-        
+
+
     def arrow(
             self, x1: float, y1: float, x2: float, y2: float,
             arrowheadlength: float = None):
@@ -67,7 +69,8 @@ class Canvas(StockCanvas):
                        radians=True)
                        
         self.restoreState()
-        
+
+
     def arrowAngle(
             self, x1: float, y1: float, r: float, theta: float,
             radians: bool = False,
@@ -106,6 +109,7 @@ class Canvas(StockCanvas):
 
         return x2, y2
 
+
     def arrowPolar(
             self, x: float, y: float, r1: float, theta1: float,
             r2: float, theta2: float, radians: bool = False,
@@ -132,7 +136,8 @@ class Canvas(StockCanvas):
         self.arrow(x1, y1, x2, y2, arrowheadlength=arrowheadlength)
 
         return x2, y2
-    
+
+
     def arrowPolarRelative(
             self, x: float, y: float, r1: float, theta1: float,
             dr: float, dtheta: float, radians: bool = False,
@@ -156,6 +161,7 @@ class Canvas(StockCanvas):
         return self.arrowAngle(x1, y1, dr, dtheta, radians=True,
                                arrowheadlength=arrowheadlength)
 
+
     def arrowRelative(
             self, x1: float, y1: float, dx: float, dy: float,
             arrowheadlength: float = None) -> (float, float):
@@ -175,7 +181,8 @@ class Canvas(StockCanvas):
         self.arrow(x1, y1, x2, y2, arrowheadlength=arrowheadlength)
 
         return x2, y2
-                   
+
+
     def drawAnchoredImage(
             self, image: (ImageReader, str), x: float, y: float,
             width: float = None, height: float = None, mask: list = None,
@@ -243,7 +250,8 @@ class Canvas(StockCanvas):
         
         return self.drawImage(image, x - x_offset, y - y_offset,
                               width=width, height=height, mask=mask)
-    
+
+
     def drawAnchoredString(
             self, x: float, y: float, text: str, anchor: str = 'c', **kwargs):
         """Draws a string in the current text styles with alignment
@@ -273,7 +281,8 @@ class Canvas(StockCanvas):
             return
             
         self.drawCentredString(x, y - y_offset, text, **kwargs)
-                   
+
+
     def lineAngle(
             self, x1: float, y1: float, r: float, theta: float,
             radians: bool = False) -> (float, float):
@@ -293,6 +302,7 @@ class Canvas(StockCanvas):
         self.line(x1, y1, x2, y2)
 
         return x2, y2
+
 
     def lineAngleDashed(
             self, x1: float, y1: float, r: float, theta: float,
@@ -326,6 +336,7 @@ class Canvas(StockCanvas):
         return ((2*num_dashes - 1)*dash_base + x1,
                 (2*num_dashes - 1)*dash_height + y1)
 
+
     def lineDashed(
             self, x1: float, y1: float, x2: float, y2: float,
             num_dashes: int = None):
@@ -346,6 +357,7 @@ class Canvas(StockCanvas):
                               2*i*dash_height + y1,
                               dash_base,
                               dash_height)
+
 
     def linePolar(
             self, x: float, y: float, r1: float, theta1: float,
@@ -370,6 +382,7 @@ class Canvas(StockCanvas):
         self.line(x1, y1, x2, y2)
 
         return x2, y2
+
 
     def linePolarDashed(
             self, x: float, y: float, r1: float, theta1: float,
@@ -397,7 +410,8 @@ class Canvas(StockCanvas):
         self.lineDashed(x1, y1, x2, y2, num_dashes=num_dashes)
 
         return x2, y2
-    
+
+
     def linePolarRelative(
             self, x: float, y: float, r1: float, theta1: float,
             dr: float, dtheta: float, radians: bool = False) -> (float, float):
@@ -417,6 +431,7 @@ class Canvas(StockCanvas):
         y1 = r1*math.sin(theta1) + y
 
         return self.lineAngle(x1, y1, dr, dtheta, radians=True)
+
 
     def linePolarRelativeDashed(
             self, x: float, y: float, r1: float, theta1: float,
@@ -442,6 +457,7 @@ class Canvas(StockCanvas):
         return self.lineAngleDashed(x1, y1, dr, dtheta, radians=True,
                                     num_dashes=num_dashes)
 
+
     def lineRelative(
             self, x1: float, y1: float,
             dx: float, dy: float) -> (float, float):
@@ -455,6 +471,7 @@ class Canvas(StockCanvas):
         self.line(x1, y1, x2, y2)
 
         return x2, y2
+
 
     def lineRelativeDashed(
             self, x1: float, y1: float, dx: float, dy: float,
@@ -471,7 +488,8 @@ class Canvas(StockCanvas):
         self.lineDashed(x1, y1, x2, y2, num_dashes=num_dashes)
 
         return x2, y2
-        
+
+
     def rectCoords(
             self, x1: float, y1: float, x2: float, y2: float,
             stroke: bool = True, fill: bool = False):
@@ -479,7 +497,8 @@ class Canvas(StockCanvas):
         right corner at (x2, y2)."""
         
         self.rect(x1, y1, x2 - x1, y2 - y1, stroke=stroke, fill=fill)
-        
+
+
     def setFont(self, psfontname: str, size: float, **kwargs):
         """Sets the font. If leading not specified, defaults to 1.2 x
         font size. Raises a readable exception if an illegal font
@@ -491,7 +510,8 @@ class Canvas(StockCanvas):
         super().setFont(psfontname, size, **kwargs)
         
         self.fontSize = size
-        
+
+
     def setFontSize(self, size: float = None, **kwargs):
         """Sets font size or leading without knowing the font face.
         
